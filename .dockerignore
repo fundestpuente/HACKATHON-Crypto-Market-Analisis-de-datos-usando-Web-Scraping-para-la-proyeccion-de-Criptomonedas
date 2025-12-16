@@ -1,0 +1,13 @@
+.venv
+__pycache__
+.git
+.gitignore
+.env
+*.pyc
+*.pyo
+*.pyd
+*.log
+data/*.parquet
+data/export
+.ipynb_checkpoints
+notebooks/*.ipynb

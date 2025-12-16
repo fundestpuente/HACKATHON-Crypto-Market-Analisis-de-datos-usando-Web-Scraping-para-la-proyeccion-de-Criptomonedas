@@ -1,0 +1,76 @@
+services:
+  api:
+    build: .
+    command: uvicorn app.api.main:app --host 0.0.0.0 --port 8000
+    env_file:
+      - .env
+    environment:
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      DATA_DIR: /app/data
+      PYTHONPATH: /app
+    ports:
+      - "8000:8000"
+    volumes:
+      - market_data:/app/data
+
+  dashboard:
+    build: .
+    command: streamlit run app/dashboard/dashboard_app.py --server.address 0.0.0.0 --server.port 8501
+    env_file:
+      - .env
+    environment:
+      API_BASE_URL: http://api:8000
+      DATA_DIR: /app/data
+      PYTHONPATH: /app
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    volumes:
+      - market_data:/app/data
+
+  ingest:
+    build: .
+    command: python -m scripts.ingest_once
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /app/data
+      PYTHONPATH: /app
+    depends_on:
+      - api
+    volumes:
+      - market_data:/app/data
+    profiles:
+      - tools
+
+  ingest-loop:
+    build: .
+    command: python -m scripts.ingest_loop --interval ${INGEST_INTERVAL_SECONDS:-300}
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /app/data
+      PYTHONPATH: /app
+    depends_on:
+      - api
+    volumes:
+      - market_data:/app/data
+
+  predict-loop:
+    build: .
+    command: python -m scripts.predict_loop --symbols ${PREDICT_SYMBOLS:-BTC,DOGE} --interval ${PREDICT_INTERVAL_SECONDS:-600} --epochs ${PREDICT_EPOCHS:-30}
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /app/data
+      PYTHONPATH: /app
+    depends_on:
+      - api
+    volumes:
+      - market_data:/app/data
+
+volumes:
+  market_data:
+    driver: local
