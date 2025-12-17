@@ -1,0 +1,31 @@
+date,source,title,sentiment_score,sentiment_label
+2025-12-17,CoinDesk,Polkadot's DOT drops 3% to $1.83 as crypto markets reverse lowerStrong selling pressure overwhelmed positive Coinbase integration news as the psychological $1.90 level failed to hold.,-0.0909090909090909,neutral
+2025-12-17,CoinDesk,"BNB drops nearly 3% to as bitcoin whipsaw and tech selloff hit crypto marketThe decline was accompanied by sharp volatility in bitcoin and weakness in U.S. tech stocks, suggesting a return of risk-off sentiment.",-0.012499999999999997,neutral
+2025-12-17,CoinDesk,"Dogecoin and shiba inu test lower levels after key support gives wayThe decline in ether contributed to the selling pressure on meme coins, as traders often use ETH as a risk gauge for altcoins.",0.0,neutral
+2025-12-17,CoinDesk,"Crypto Long & Short: What the DOJ’s Massive Crypto Seizures Mean for the IndustryIn this week’s Crypto Long & Short Newsletter, Jared Lenow’s insights on the DOJ’s increased focus on crypto seizures and what it means for the broader industry – the good, the bad and the ugly. Then, we dive into a year end vibe check with two observations, two predictions and reader favorite quotes from 2025 by Andy Baehr.",-0.05937499999999999,neutral
+2025-12-17,CoinDesk,"XRP falls 5% as bitcoin’s sudden pump and dump rattles crypto marketsXRP's price action now faces resistance at the former support levels, with $1.90 as the immediate line of defense.",0.03333333333333333,neutral
+2025-12-17,CoinDesk,"Crypto stocks pare gains as bitcoin retreats from $90,000 rallyCrypto-linked stocks pulled back, with miners like MARA Holdings (MARA) down 4.8% and Core Scientific (CORZ) down 6%.",-0.1037037037037037,negative
+2025-12-17,CoinDesk,Crypto industry insiders meet with key senators on market structure bill negotiationExecutives and lobbyists are attending a meeting today with Senator Tim Scott and others to hash out the ongoing talks over crypto's most important policy effort.,0.3,positive
+2025-12-17,CoinDesk,"The Protocol: Bug that can drain all your tokens impacting 'thousands' of sitesAlso: Ripple news, Aave protocol debate, and pudgy penguins takeover",0.0,neutral
+2025-12-17,CoinDesk,"Bitcoin tumbles back below $88,000 as gains evaporate as quickly as they formedIt was a blink and you missed it rally as continued deflation in the AI trade sent the Nasdaq sharply lower, dragging crypto along with it.",0.06944444444444443,neutral
+2025-12-17,CoinDesk,"Robinhood looks better placed than Coinbase for prediction-market upside, Mizuho saysRobinhood stands to gain more from prediction markets than Coinbase as users plan to deploy fresh capital rather than sell existing crypto, the bank said.",0.43333333333333335,positive
+2025-12-17,CoinDesk,"Macquarie sees U.S. Senate near crypto deal as market structure, GENIUS rules advanceThe bank said bipartisan Senate talks on market structure legislation and parallel GENIUS Act rulemaking could deliver a workable U.S. crypto framework by early 2026.",0.06666666666666667,neutral
+2025-12-17,CoinDesk,"Bitcoin shorts scramble for the exits as BTC climbsBitcoin surged from an intraday low near $86,200 to reclaim $90,000, driven by aggressive spot buying and a wave of short liquidations.",0.03333333333333333,neutral
+2025-12-17,CoinDesk,"Hut 8 and Coinbase outperform as Crypto stocks jump on bitcoin's sudden rallyMining stocks, trading platforms, and cryptocurrency infrastructure firms saw significant gains, including Hut 8, Riot Platforms, and Coinbase.",0.1875,positive
+2025-12-17,CoinDesk,"Bitcoin re-takes $90,000 as price spikes early in U.S. sessionSurging metals prices and dovish comments from leading Fed chair contender Chris Waller were among the news items possibly boosting crypto prices.",0.05,neutral
+2025-12-17,CoinDesk,"Most Influential: Vlad TenevRobinhood has acquired Bitstamp, launched staking services for ether and solana, and added new tokens for US users, including XRP, SOL, and BNB.",0.3181818181818182,positive
+2025-12-17,CoinDesk,"Most Influential: Paul AtkinsUnder Atkins’ leadership, the U.S. Securities and Exchange Commission (SEC) has undergone a near-complete reversal of the way it regulates crypto.",0.2,positive
+2025-12-17,CoinDesk,"Most Influential: Caroline PhamAs an acting chairman at the Commodity Futures Trading Commission, Caroline Pham pulled no punches in pursuing crypto-friendly policy aims.",0.25,positive
+2025-12-17,CoinDesk,"Most Influential: Carlos DomingoThe Securitize CEO ground through the uncool years of tokenization while NFTs, FTX and memecoins soaked up the hype. With billions in tokenized assets, a SPAC listing in the works and BlackRock as a flagship client and backer, Carlos Domingo’s early bet is finally paying off.",0.19999999999999998,positive
+2025-12-17,CoinDesk,"Most Influential: Jeremy AllaireAllaire spent 2025 pushing regulated digital dollars into the mainstream, shaping U.S. policy and unveiling Arc as the foundation for institutional blockchain finance.",0.13333333333333333,positive
+2025-12-17,CoinDesk,"CoinDesk 20 Performance Update: NEAR Protocol Falls 4.1%, Leading Index LowerSui (SUI) was also an underperformer, declining 2.4% from Tuesday.",0.1,neutral
+2025-12-17,CoinDesk,Polkadot Gains Native USDC Access via Coinbase,0.0,neutral
+2025-12-17,CoinDesk,"MEXC Research: 81% of Global Privacy Coin Trading Volume Originates from MENA, CIS, and Southeast Asia",0.0,neutral
+2025-12-17,CoinDesk,"Hacken Releases MEXC’s Audit, Confirms Full Asset Backing and Strengthened Transparency Standards",0.35,positive
+2025-12-17,CoinDesk,"Bitcoin tumbles back below $88,000 as gains evaporate as quickly as they formed",0.16666666666666666,positive
+2025-12-17,CoinDesk,"Bitcoin tumbles back below $88,000 as gains evaporate as quickly as they formed",0.16666666666666666,positive
+2025-12-17,CoinDesk,Crypto industry insiders meet with key senators on market structure bill negotiation,0.0,neutral
+2025-12-17,CoinDesk,"Crypto stocks pare gains as bitcoin retreats from $90,000 rally",0.0,neutral
+2025-12-17,CoinDesk,Wall Street giant DTCC Picks privacy focused blockchain Canton Network for tokenization,0.0,neutral
+2025-12-17,CoinDesk,Building the Infrastructure for the $2 Trillion Stablecoin Economy,0.0,neutral
+2025-12-17,CoinDesk,Memecoin boom turns into capitulation one year after $150 billion market peak,0.0,neutral
