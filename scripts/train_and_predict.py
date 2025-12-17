@@ -19,6 +19,7 @@ import tensorflow as tf
 
 from app.config import settings
 
+SENTIMENT_PATH = Path("data/sentiment_coindesk.csv")
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train and predict for a list of symbols (e.g., BTC,DOGE).")
@@ -64,7 +65,7 @@ def make_windows(series: np.ndarray, window: int, horizon: int) -> Tuple[np.ndar
 def build_model(window: int, horizon: int) -> tf.keras.Model:
     model = tf.keras.Sequential(
         [
-            tf.keras.layers.Input(shape=(window, 1)),
+            tf.keras.layers.Input(shape=(window, 2)),
             tf.keras.layers.Conv1D(
                 filters=32,
                 kernel_size=3,
@@ -86,13 +87,13 @@ def build_model(window: int, horizon: int) -> tf.keras.Model:
 
 
 def sanitize_returns(df_sym: pd.DataFrame) -> np.ndarray:
-    """Prepare log-returns: sort, de-dup, outlier trim, light smoothing."""
     df_sym = (
         df_sym.sort_values("as_of")
         .drop_duplicates(subset="as_of", keep="last")
         .assign(price=lambda x: pd.to_numeric(x["price"], errors="coerce"))
         .dropna(subset=["price"])
     )
+
     df_sym["log_return"] = np.log(df_sym["price"].astype(float)).diff()
     df_sym = df_sym.dropna(subset=["log_return"])
 
@@ -101,9 +102,27 @@ def sanitize_returns(df_sym: pd.DataFrame) -> np.ndarray:
     z = 0.6745 * (df_sym["log_return"] - med) / mad
     df_sym = df_sym[np.abs(z) <= 6]
 
-    df_sym["log_return"] = df_sym["log_return"].rolling(window=3, min_periods=1, center=True).median()
-    df_sym = df_sym.dropna(subset=["log_return"])
-    return df_sym["log_return"].to_numpy()
+    df_sym["log_return"] = (
+        df_sym["log_return"]
+        .rolling(window=3, min_periods=1, center=True)
+        .median()
+    )
+
+    df_sym = df_sym.dropna(subset=["log_return", "daily_sentiment"])
+
+    return df_sym[["log_return", "daily_sentiment"]].to_numpy()
+
+def load_daily_sentiment(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path)
+    df["date"] = pd.to_datetime(df["date"]).dt.date
+
+    daily = (
+        df.groupby("date")["sentiment"]
+        .mean()
+        .reset_index()
+        .rename(columns={"sentiment": "daily_sentiment"})
+    )
+    return daily
 
 
 def train_single(
@@ -116,6 +135,15 @@ def train_single(
 ) -> tuple[tf.keras.Model, dict, float, float, float]:
     df_sym = df[df["symbol"].str.upper() == symbol].copy()
     df_sym = df_sym.sort_values("as_of")
+    # Merge daily sentiment
+    sentiment_df = load_daily_sentiment(SENTIMENT_PATH)
+
+    df_sym["date"] = pd.to_datetime(df_sym["as_of"]).dt.date
+    df_sym = df_sym.merge(sentiment_df, on="date", how="left")
+
+    # Neutral sentiment if no news that day
+    df_sym["daily_sentiment"] = df_sym["daily_sentiment"].fillna(0.0)
+
     if df_sym.empty:
         raise ValueError(f"No data for symbol {symbol}.")
 
@@ -132,7 +160,7 @@ def train_single(
         window = suggested
 
     X, y = make_windows(returns, window, horizon)
-    X = np.expand_dims(X, axis=-1)
+    """X = np.expand_dims(X, axis=-1)"""
     n = len(X)
     if n == 0:
         raise ValueError(f"Still no windows for {symbol} after adjusting window size.")
@@ -149,8 +177,9 @@ def train_single(
     X_val, y_val = X[train_n : train_n + val_n], y[train_n : train_n + val_n]
     X_test, y_test = X[train_n + val_n :], y[train_n + val_n :]
 
-    mu = X_train.mean()
-    sigma = X_train.std() + 1e-8
+    mu = X_train.mean(axis=(0, 1))
+    sigma = X_train.std(axis=(0, 1)) + 1e-8
+
     X_train = (X_train - mu) / sigma
     X_val = (X_val - mu) / sigma
     X_test = (X_test - mu) / sigma
@@ -202,32 +231,58 @@ def predict_next(
     step_minutes: int = 5,
 ):
     predicted_at = pd.Timestamp.utcnow()
+
+    # Merge sentiment
+    sentiment_df = load_daily_sentiment(SENTIMENT_PATH)
     df_sym = (
         df_sym.sort_values("as_of")
-        .assign(price=lambda x: pd.to_numeric(x["price"], errors="coerce"))
+        .assign(
+            price=lambda x: pd.to_numeric(x["price"], errors="coerce"),
+            date=lambda x: pd.to_datetime(x["as_of"]).dt.date,
+        )
+        .merge(sentiment_df, on="date", how="left")
         .dropna(subset=["price"])
     )
-    latest_returns = sanitize_returns(df_sym)
-    if len(latest_returns) < window:
-        if len(latest_returns) == 0:
-            raise ValueError(f"No valid returns to predict for {df_sym['symbol'].iloc[0]}")
-        pad = np.repeat(latest_returns[-1], window - len(latest_returns))
-        latest_returns = np.concatenate([latest_returns, pad])
+
+    # Neutral sentiment if no news
+    df_sym["daily_sentiment"] = df_sym["daily_sentiment"].fillna(0.0)
+
+    # Now returns + sentiment
+    latest_features = sanitize_returns(df_sym)
+
+    if len(latest_features) < window:
+        if len(latest_features) == 0:
+            raise ValueError(f"No valid data to predict for {df_sym['symbol'].iloc[0]}")
+        pad = np.repeat(
+            latest_features[-1].reshape(1, 2),
+            window - len(latest_features),
+            axis=0,
+        )
+        latest_features = np.vstack([latest_features, pad])
     else:
-        latest_returns = latest_returns[-window:]
+        latest_features = latest_features[-window:]
+
     last_price = float(df_sym["price"].iloc[-1])
-    X = latest_returns.reshape(1, window, 1)
+
+    # (1, window, 2)
+    X = latest_features.reshape(1, window, 2)
     X = (X - mu) / sigma
+
     pred_returns = model.predict(X, verbose=0)[0]
+
     forecast_prices = []
     running = last_price
     for r in pred_returns:
         running *= float(np.exp(r))
         forecast_prices.append(running)
-    last_ts = df_sym["as_of"].max()
-    forecast_times = [last_ts + pd.Timedelta(minutes=step_minutes * (i + 1)) for i in range(len(pred_returns))]
-    return pred_returns, forecast_prices, last_price, forecast_times, predicted_at
 
+    last_ts = df_sym["as_of"].max()
+    forecast_times = [
+        last_ts + pd.Timedelta(minutes=step_minutes * (i + 1))
+        for i in range(len(pred_returns))
+    ]
+
+    return pred_returns, forecast_prices, last_price, forecast_times, predicted_at
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
