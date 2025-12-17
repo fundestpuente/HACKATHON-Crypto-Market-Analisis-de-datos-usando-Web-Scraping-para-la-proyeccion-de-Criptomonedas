@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import logging
+import os
 import time
 
 from scripts import train_and_predict
@@ -22,6 +23,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=30, help="Training epochs.")
     parser.add_argument("--batch-size", type=int, default=32, help="Batch size.")
     parser.add_argument("--model-dir", type=str, default="data/export/models", help="Directory to save models.")
+    env_step = os.getenv("PREDICT_STEP_MINUTES")
+    default_step = int(env_step) if env_step else None
+    parser.add_argument("--step-minutes", type=int, default=default_step, help="Override forecast step size in minutes.")
+    parser.add_argument(
+        "--blend-alpha",
+        type=float,
+        default=float(os.getenv("PREDICT_BLEND_ALPHA", "0.35")),
+        help="Blend weight for model vs baseline returns (0-1).",
+    )
+    parser.add_argument(
+        "--return-clip-mult",
+        type=float,
+        default=float(os.getenv("PREDICT_RETURN_CLIP_MULT", "3.0")),
+        help="Clip multiplier over recent return volatility.",
+    )
+    parser.add_argument(
+        "--return-clip-min",
+        type=float,
+        default=float(os.getenv("PREDICT_MIN_RETURN_CLIP", "0.001")),
+        help="Minimum absolute clip for predicted returns.",
+    )
     return parser.parse_args()
 
 
@@ -40,7 +62,12 @@ async def main() -> None:
                 f"--epochs={args.epochs}",
                 f"--batch-size={args.batch_size}",
                 f"--model-dir={args.model_dir}",
+                f"--blend-alpha={args.blend_alpha}",
+                f"--return-clip-mult={args.return_clip_mult}",
+                f"--return-clip-min={args.return_clip_min}",
             ]
+            if args.step_minutes is not None:
+                argv.append(f"--step-minutes={args.step_minutes}")
             train_and_predict.main(argv)
         except Exception as exc:
             logger.exception("Predict loop error: %s", exc)

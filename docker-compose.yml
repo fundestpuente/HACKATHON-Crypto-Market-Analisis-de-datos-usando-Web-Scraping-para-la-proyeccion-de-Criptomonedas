@@ -30,6 +30,30 @@ services:
     volumes:
       - market_data:/app/data
 
+  sentiment:
+    build: .
+    command: python -m scripts.sentiment_once --limit ${SENTIMENT_HEADLINES_LIMIT:-30}
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /app/data
+      PYTHONPATH: /app
+    volumes:
+      - market_data:/app/data
+    profiles:
+      - tools
+
+  sentiment-loop:
+    build: .
+    command: python -m scripts.sentiment_loop --interval ${SENTIMENT_INTERVAL_SECONDS:-900} --limit ${SENTIMENT_HEADLINES_LIMIT:-30}
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /app/data
+      PYTHONPATH: /app
+    volumes:
+      - market_data:/app/data
+
   ingest:
     build: .
     command: python -m scripts.ingest_once
@@ -60,7 +84,7 @@ services:
 
   predict-loop:
     build: .
-    command: python -m scripts.predict_loop --symbols ${PREDICT_SYMBOLS:-BTC,DOGE} --interval ${PREDICT_INTERVAL_SECONDS:-600} --epochs ${PREDICT_EPOCHS:-30}
+    command: python -m scripts.predict_loop --symbols ${PREDICT_SYMBOLS:-BTC,DOGE} --interval ${PREDICT_INTERVAL_SECONDS:-600} --epochs ${PREDICT_EPOCHS:-30} --step-minutes ${PREDICT_STEP_MINUTES:-5}
     env_file:
       - .env
     environment:
@@ -68,6 +92,7 @@ services:
       PYTHONPATH: /app
     depends_on:
       - api
+      - sentiment-loop
     volumes:
       - market_data:/app/data
 

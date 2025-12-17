@@ -41,6 +41,26 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def sanitize_returns(df_sym: pd.DataFrame) -> np.ndarray:
+    df_sym = (
+        df_sym.sort_values("as_of")
+        .drop_duplicates(subset="as_of", keep="last")
+        .assign(price=lambda x: pd.to_numeric(x["price"], errors="coerce"))
+        .dropna(subset=["price"])
+    )
+    df_sym["log_return"] = np.log(df_sym["price"].astype(float)).diff()
+    df_sym = df_sym.dropna(subset=["log_return"])
+
+    med = df_sym["log_return"].median()
+    mad = (df_sym["log_return"] - med).abs().median() + 1e-8
+    z = 0.6745 * (df_sym["log_return"] - med) / mad
+    df_sym = df_sym[np.abs(z) <= 6]
+
+    df_sym["log_return"] = df_sym["log_return"].rolling(window=3, min_periods=1, center=True).median()
+    df_sym = df_sym.dropna(subset=["log_return"])
+    return df_sym["log_return"].to_numpy()
+
+
 def main() -> None:
     args = parse_args()
     symbol = args.symbol.upper()
@@ -61,8 +81,10 @@ def main() -> None:
     if len(df_symbol) < window + 1:
         raise SystemExit(f"Not enough data for {symbol}; need at least {window+1} rows.")
 
-    df_symbol["log_return"] = np.log(df_symbol["price"].astype(float)).diff()
-    latest_returns = df_symbol["log_return"].dropna().to_numpy()[-window:]
+    returns = sanitize_returns(df_symbol)
+    if len(returns) < window:
+        raise SystemExit(f"Not enough cleaned data for {symbol}; need at least {window} returns.")
+    latest_returns = returns[-window:]
     last_price = float(df_symbol["price"].iloc[-1])
 
     X = latest_returns.reshape(1, window, 1)

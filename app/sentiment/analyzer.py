@@ -1,9 +1,11 @@
-from textblob import TextBlob
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+_analyzer = SentimentIntensityAnalyzer()
 
 
-def analyze_sentiment(text):
-    analysis = TextBlob(text)
-    polarity = analysis.sentiment.polarity
+def analyze_sentiment(text: str) -> dict:
+    scores = _analyzer.polarity_scores(text or "")
+    polarity = scores.get("compound", 0.0)
 
     if polarity > 0.1:
         label = "positive"
@@ -14,5 +16,5 @@ def analyze_sentiment(text):
 
     return {
         "polarity": polarity,
-        "label": label
+        "label": label,
     }

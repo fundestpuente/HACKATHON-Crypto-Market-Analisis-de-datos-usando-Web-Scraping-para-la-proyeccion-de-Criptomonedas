@@ -4,10 +4,13 @@ from datetime import datetime
 
 
 COINDESK_URL = "https://www.coindesk.com/"
+DEFAULT_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+}
 
 
 def scrape_coindesk_headlines(limit=20):
-    response = requests.get(COINDESK_URL, timeout=10)
+    response = requests.get(COINDESK_URL, timeout=10, headers=DEFAULT_HEADERS)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")

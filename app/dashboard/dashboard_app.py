@@ -14,7 +14,7 @@ LOCAL_TZ = "America/Guayaquil"
 
 st.set_page_config(page_title="Observatorio Cripto con IA", layout="wide")
 st.title("🚀 Observatorio Cripto con IA")
-st.caption("Datos unificados del mercado + dataset listo para TensorFlow + panel interactivo")
+st.caption("Datos unificados del mercado - Sentimiento del mercado + Cotización actual")
 st.markdown(
     """
     <style>

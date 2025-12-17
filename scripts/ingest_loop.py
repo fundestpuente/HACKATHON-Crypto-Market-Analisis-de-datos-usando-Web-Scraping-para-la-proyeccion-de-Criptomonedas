@@ -16,8 +16,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--interval",
         type=int,
-        default=1800,
-        help="Interval in seconds between runs (default: 1800s = 30 minutes).",
+        default=300,
+        help="Interval in seconds between runs (default: 300s = 5 minutes).",
     )
     return parser.parse_args()
 
